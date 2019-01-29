@@ -32,10 +32,6 @@
 
 #include "I2SMaster.h"
 
-#ifndef GOOYA_RECORD_CHUNK_COUNT
-#define GOOYA_RECORD_CHUNK_COUNT (2)
-#endif
-
 #ifndef GOOYA_RECORD_BUFFER_COUNT
 #define GOOYA_RECORD_BUFFER_COUNT (16)
 #endif
@@ -47,7 +43,7 @@
 using namespace std;
 
 //callback
-typedef void (* GOOYA_AUDIOCALLBACK)(int16_t* input, int16_t* output, int32_t frames); 
+typedef void (* GOOYA_AUDIOCALLBACK)(const int16_t* input, int16_t* output, int32_t frames); 
 
 #define GOOYARECORDER_MICIN 0
 #define GOOYARECORDER_LINEIN 1
@@ -73,6 +69,7 @@ private:
     void inputcallback(int16_t* input, int32_t frames);
     static void _inputcallback(int16_t* input, int32_t frames, void* param);
 
+    bool running;
     TaskHandle_t recorder_task;
     void recorder_task_function();
     static void _recorder_task_function(void* param);
@@ -92,12 +89,12 @@ private:
     File* file;
 
     xQueueHandle queue;
-    //int32_t pos;
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
     void outputcallback(int16_t* output, int32_t frames);
     static void _outputcallback(int16_t* output, int32_t frames, void* param);
 
+    bool running;
     TaskHandle_t player_task;
     void player_task_function();
     static void _player_task_function(void* param);
