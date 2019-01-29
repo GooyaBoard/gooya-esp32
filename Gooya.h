@@ -100,11 +100,42 @@ private:
     static void _player_task_function(void* param);
 };
 
+class GooyaEffect
+{
+public:
+    GooyaEffect();
+    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback);
+    void stop();
+
+private:
+    I2SMaster i2s;
+    WM8731 codec;
+
+    xQueueHandle inputqueue;
+    xQueueHandle outputqueue;
+    int32_t pos;
+    int32_t chunk_count;
+    
+    std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    
+    void inputcallback(int16_t* output, int32_t frames);
+    static void _inputcallback(int16_t* output, int32_t frames, void* param);
+
+    void outputcallback(int16_t* output, int32_t frames);
+    static void _outputcallback(int16_t* output, int32_t frames, void* param);
+
+    GOOYA_AUDIOCALLBACK callback;
+
+    bool running;
+    TaskHandle_t effect_task;
+    void effect_task_function();
+    static void _effect_task_function(void* param);
+};
+
 
 /*
 class GooyaAnalyzer
 class GooyaGenerator
-class GooyaEffector
 */
 
 #endif

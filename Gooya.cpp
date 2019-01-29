@@ -170,6 +170,107 @@ void GooyaPlayer::stop()
     codec.stop();
 }
 
+// effect
+void GooyaEffect::_inputcallback(int16_t* input, int32_t frames, void* param)
+{
+    GooyaEffect* _this=(GooyaEffect*)param;
+    _this->inputcallback(input,frames);
+}
+
+void GooyaEffect::inputcallback(int16_t* input, int32_t frames)
+{
+    int16_t* buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
+    
+    for (int i=0; i<DMA_AUDIO_FRAMES; i++) {
+        buff[AUDIO_CHANNELS*i] = input[AUDIO_CHANNELS*i];
+        buff[AUDIO_CHANNELS*i+1] = input[AUDIO_CHANNELS*i+1];
+    }
+    pos = (pos+1)%GOOYA_RECORD_BUFFER_COUNT;
+    buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
+    if(xQueueSend(inputqueue, &buff, 0)==errQUEUE_FULL)
+        Serial.println("over flow\n");
+}
+
+void GooyaEffect::_outputcallback(int16_t* output, int32_t frames, void* param)
+{
+    GooyaEffect* _this=(GooyaEffect*)param;
+    _this->outputcallback(output,frames);
+}
+
+void GooyaEffect::outputcallback(int16_t* output, int32_t frames)
+{
+    int16_t* buff=0;
+    if(xQueueReceive(outputqueue, &buff, 0) && buff!=0){
+        for(int i=0;i<DMA_AUDIO_FRAMES;i++)
+        {
+            output[AUDIO_CHANNELS*i]=buff[AUDIO_CHANNELS*i];
+            output[AUDIO_CHANNELS*i+1]=buff[AUDIO_CHANNELS*i+1];
+        }
+    }
+}
+
+void GooyaEffect::_effect_task_function(void* param)
+{
+    GooyaEffect* _this=(GooyaEffect*)param;
+    _this->effect_task_function();
+}
+
+void GooyaEffect::effect_task_function()
+{
+    int16_t* buff=0;
+    while(running)
+    {        
+        if(xQueueReceive(inputqueue, &buff, 0) && buff!=0){
+            //file->write((const uint8_t*)buff,GOOYA_RECORD_CHUNK_COUNT*DMA_AUDIO_FRAMES*AUDIO_CHANNELS*sizeof(int16_t));
+            callback((const int16_t*)buff,(int16_t*)buff,DMA_AUDIO_FRAMES*AUDIO_CHANNELS);
+            if(xQueueSend(outputqueue, &buff, 0)==errQUEUE_FULL)
+                Serial.println("over flow\n");
+            //file->flush();
+            //Serial.println("write\n");
+        }
+        else
+        {
+            //Serial.println("under flow\n");
+            vTaskDelay(1);
+        }
+    }
+    vTaskDelete(NULL);
+}
+
+
+GooyaEffect::GooyaEffect()
+{
+    pos=0;
+    chunk_count=0;
+    signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT);
+    inputqueue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
+    outputqueue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
+}
+
+void GooyaEffect::start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK _callback)
+{
+    codec.initialize((gpio_num_t)I2C_SDIN, (gpio_num_t)I2C_SCLK, (gpio_num_t)I2C_ADR);
+    codec.start();
+    
+    if(devid==GOOYARECORDER_MICIN)
+        codec.setup(sample_rate,true,true);
+    else if(devid==GOOYARECORDER_LINEIN)
+        codec.setup(sample_rate,false,false);
+    
+    i2s.initialize(sample_rate,GOOYA_CPU,GooyaEffect::_inputcallback,GooyaEffect::_outputcallback,this);
+
+    pos=0;
+    running=true;
+    callback=_callback;
+    xTaskCreatePinnedToCore((TaskFunction_t)&_effect_task_function, "effect_task", 2048, this, 6, &effect_task, 0);
+    
+    i2s.start();
+}
+
+void GooyaEffect::stop()
+{
+    running=false;
+    effect_task=NULL;
     i2s.stop();
     codec.stop();
 }
