@@ -32,10 +32,6 @@
 
 #include "I2SMaster.h"
 
-#ifndef GOOYA_RECORD_CHUNK_COUNT
-#define GOOYA_RECORD_CHUNK_COUNT (2)
-#endif
-
 #ifndef GOOYA_RECORD_BUFFER_COUNT
 #define GOOYA_RECORD_BUFFER_COUNT (16)
 #endif
@@ -47,7 +43,7 @@
 using namespace std;
 
 //callback
-typedef void (* GOOYA_AUDIOCALLBACK)(int16_t* input, int16_t* output, int32_t frames); 
+typedef void (* GOOYA_AUDIOCALLBACK)(const int16_t* input, int16_t* output, int8_t chs, int32_t frames); 
 
 #define GOOYARECORDER_MICIN 0
 #define GOOYARECORDER_LINEIN 1
@@ -70,9 +66,10 @@ private:
     int32_t chunk_count;
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
-    void inputcallback(int16_t* input, int32_t frames);
-    static void _inputcallback(int16_t* input, int32_t frames, void* param);
+    void inputcallback(int16_t* input, int8_t chs, int32_t frames);
+    static void _inputcallback(int16_t* input, int8_t chs, int32_t frames, void* param);
 
+    bool running;
     TaskHandle_t recorder_task;
     void recorder_task_function();
     static void _recorder_task_function(void* param);
@@ -92,22 +89,53 @@ private:
     File* file;
 
     xQueueHandle queue;
-    //int32_t pos;
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
-    void outputcallback(int16_t* output, int32_t frames);
-    static void _outputcallback(int16_t* output, int32_t frames, void* param);
+    void outputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
 
+    bool running;
     TaskHandle_t player_task;
     void player_task_function();
     static void _player_task_function(void* param);
+};
+
+class GooyaEffect
+{
+public:
+    GooyaEffect();
+    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback);
+    void stop();
+
+private:
+    I2SMaster i2s;
+    WM8731 codec;
+
+    xQueueHandle inputqueue;
+    xQueueHandle outputqueue;
+    int32_t pos;
+    int32_t chunk_count;
+    
+    std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    
+    void inputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _inputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
+
+    void outputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
+
+    GOOYA_AUDIOCALLBACK callback;
+
+    bool running;
+    TaskHandle_t effect_task;
+    void effect_task_function();
+    static void _effect_task_function(void* param);
 };
 
 
 /*
 class GooyaAnalyzer
 class GooyaGenerator
-class GooyaEffector
 */
 
 #endif
