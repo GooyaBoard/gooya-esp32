@@ -22,7 +22,7 @@ void I2SMaster::audio_input_task(void* pvParameters)
         if(err)
             log_w("i2s_read faild, esp_err_t=%d",err);
         
-        (*_this->inputcallback)((int16_t*)&buffer[n*DMA_BUFFER_SIZE], DMA_AUDIO_FRAMES, _this->param);
+        (*_this->inputcallback)((int16_t*)&buffer[n*DMA_BUFFER_SIZE], AUDIO_CHANNELS, DMA_AUDIO_FRAMES, _this->param);
         n = (n+1)%DMA_BUFFER_COUNT;
     }
 }
@@ -40,7 +40,7 @@ void I2SMaster::audio_output_task(void* pvParameters)
             log_w("i2s_write faild, esp_err_t=%d",err);
 
 	    n = (n+1)%DMA_BUFFER_COUNT;
-        (*_this->outputcallback)((int16_t*)&buffer[n*DMA_BUFFER_SIZE], DMA_AUDIO_FRAMES, _this->param);
+        (*_this->outputcallback)((int16_t*)&buffer[n*DMA_BUFFER_SIZE], AUDIO_CHANNELS, DMA_AUDIO_FRAMES, _this->param);
     }
 }
 
