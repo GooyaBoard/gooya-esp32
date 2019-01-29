@@ -43,7 +43,7 @@
 using namespace std;
 
 //callback
-typedef void (* GOOYA_AUDIOCALLBACK)(const int16_t* input, int16_t* output, int32_t frames); 
+typedef void (* GOOYA_AUDIOCALLBACK)(const int16_t* input, int16_t* output, int8_t chs, int32_t frames); 
 
 #define GOOYARECORDER_MICIN 0
 #define GOOYARECORDER_LINEIN 1
@@ -66,8 +66,8 @@ private:
     int32_t chunk_count;
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
-    void inputcallback(int16_t* input, int32_t frames);
-    static void _inputcallback(int16_t* input, int32_t frames, void* param);
+    void inputcallback(int16_t* input, int8_t chs, int32_t frames);
+    static void _inputcallback(int16_t* input, int8_t chs, int32_t frames, void* param);
 
     bool running;
     TaskHandle_t recorder_task;
@@ -91,8 +91,8 @@ private:
     xQueueHandle queue;
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
-    void outputcallback(int16_t* output, int32_t frames);
-    static void _outputcallback(int16_t* output, int32_t frames, void* param);
+    void outputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
 
     bool running;
     TaskHandle_t player_task;
@@ -118,11 +118,11 @@ private:
     
     std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
     
-    void inputcallback(int16_t* output, int32_t frames);
-    static void _inputcallback(int16_t* output, int32_t frames, void* param);
+    void inputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _inputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
 
-    void outputcallback(int16_t* output, int32_t frames);
-    static void _outputcallback(int16_t* output, int32_t frames, void* param);
+    void outputcallback(int16_t* output, int8_t chs, int32_t frames);
+    static void _outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
 
     GOOYA_AUDIOCALLBACK callback;
 

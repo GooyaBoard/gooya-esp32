@@ -47,7 +47,7 @@ using namespace std;
 
 #define DMA_TOTAL_BUFFER_SIZE (DMA_BUFFER_SIZE*DMA_BUFFER_COUNT)
 
-typedef void (* I2S_AUDIOCALLBACK)(int16_t* buffer, int32_t frames, void* param); 
+typedef void (* I2S_AUDIOCALLBACK)(int16_t* buffer, int8_t chs, int32_t frames, void* param); 
 
 class I2SMaster
 {

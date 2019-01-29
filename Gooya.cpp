@@ -9,19 +9,20 @@
 #include <math.h>
 
 //recorder
-void GooyaRecorder::_inputcallback(int16_t* input, int32_t frames, void* param)
+void GooyaRecorder::_inputcallback(int16_t* input, int8_t chs, int32_t frames, void* param)
 {
     GooyaRecorder* _this=(GooyaRecorder*)param;
-    _this->inputcallback(input,frames);
+    _this->inputcallback(input,chs,frames);
 }
 
-void GooyaRecorder::inputcallback(int16_t* input, int32_t frames)
+void GooyaRecorder::inputcallback(int16_t* input, int8_t chs, int32_t frames)
 {
     int16_t* buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
     
-    for (int i=0; i<DMA_AUDIO_FRAMES; i++) {
-        buff[AUDIO_CHANNELS*i] = input[AUDIO_CHANNELS*i];
-        buff[AUDIO_CHANNELS*i+1] = input[AUDIO_CHANNELS*i+1];
+    for (int i=0; i<DMA_AUDIO_FRAMES; i++){
+        for(int ch=0;ch<chs;ch++){
+            buff[chs*i] = input[chs*i+ch];
+        }
     }
     pos = (pos+1)%GOOYA_RECORD_BUFFER_COUNT;
     buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
@@ -98,20 +99,20 @@ void GooyaRecorder::stop()
 
 
 //player
-void GooyaPlayer::_outputcallback(int16_t* output, int32_t frames, void* param)
+void GooyaPlayer::_outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param)
 {
     GooyaPlayer* _this=(GooyaPlayer*)param;
-    _this->outputcallback(output,frames);
+    _this->outputcallback(output,chs,frames);
 }
 
-void GooyaPlayer::outputcallback(int16_t* output, int32_t frames)
+void GooyaPlayer::outputcallback(int16_t* output, int8_t chs, int32_t frames)
 {
     int16_t* buff=0;
     if(xQueueReceive(queue, &buff, 0) && buff!=0){
-        for(int i=0;i<DMA_AUDIO_FRAMES;i++)
-        {
-            output[AUDIO_CHANNELS*i]=buff[AUDIO_CHANNELS*i];
-            output[AUDIO_CHANNELS*i+1]=buff[AUDIO_CHANNELS*i+1];
+        for(int i=0;i<frames;i++){
+            for(int ch=0;ch<chs;ch++){
+                output[chs*i+ch]=buff[chs*i+ch];
+            }
         }
     }
 }
@@ -171,19 +172,20 @@ void GooyaPlayer::stop()
 }
 
 // effect
-void GooyaEffect::_inputcallback(int16_t* input, int32_t frames, void* param)
+void GooyaEffect::_inputcallback(int16_t* input, int8_t chs, int32_t frames, void* param)
 {
     GooyaEffect* _this=(GooyaEffect*)param;
-    _this->inputcallback(input,frames);
+    _this->inputcallback(input,chs,frames);
 }
 
-void GooyaEffect::inputcallback(int16_t* input, int32_t frames)
+void GooyaEffect::inputcallback(int16_t* input, int8_t chs, int32_t frames)
 {
     int16_t* buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
     
-    for (int i=0; i<DMA_AUDIO_FRAMES; i++) {
-        buff[AUDIO_CHANNELS*i] = input[AUDIO_CHANNELS*i];
-        buff[AUDIO_CHANNELS*i+1] = input[AUDIO_CHANNELS*i+1];
+    for (int i=0; i<frames; i++) {
+        for(int ch=0;ch<chs;ch++){
+            buff[chs*i+ch] = input[chs*i+ch];
+        }
     }
     pos = (pos+1)%GOOYA_RECORD_BUFFER_COUNT;
     buff=&signal[pos*DMA_AUDIO_FRAMES*AUDIO_CHANNELS];
@@ -191,20 +193,20 @@ void GooyaEffect::inputcallback(int16_t* input, int32_t frames)
         Serial.println("over flow\n");
 }
 
-void GooyaEffect::_outputcallback(int16_t* output, int32_t frames, void* param)
+void GooyaEffect::_outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param)
 {
     GooyaEffect* _this=(GooyaEffect*)param;
-    _this->outputcallback(output,frames);
+    _this->outputcallback(output,chs,frames);
 }
 
-void GooyaEffect::outputcallback(int16_t* output, int32_t frames)
+void GooyaEffect::outputcallback(int16_t* output, int8_t chs, int32_t frames)
 {
     int16_t* buff=0;
     if(xQueueReceive(outputqueue, &buff, 0) && buff!=0){
-        for(int i=0;i<DMA_AUDIO_FRAMES;i++)
-        {
-            output[AUDIO_CHANNELS*i]=buff[AUDIO_CHANNELS*i];
-            output[AUDIO_CHANNELS*i+1]=buff[AUDIO_CHANNELS*i+1];
+        for(int i=0;i<frames;i++){
+            for(int ch=0;ch<chs;ch++){
+                output[chs*i+ch]=buff[chs*i+ch];
+            }
         }
     }
 }
@@ -222,7 +224,7 @@ void GooyaEffect::effect_task_function()
     {        
         if(xQueueReceive(inputqueue, &buff, 0) && buff!=0){
             //file->write((const uint8_t*)buff,GOOYA_RECORD_CHUNK_COUNT*DMA_AUDIO_FRAMES*AUDIO_CHANNELS*sizeof(int16_t));
-            callback((const int16_t*)buff,(int16_t*)buff,DMA_AUDIO_FRAMES*AUDIO_CHANNELS);
+            callback((const int16_t*)buff,(int16_t*)buff,AUDIO_CHANNELS,DMA_AUDIO_FRAMES);
             if(xQueueSend(outputqueue, &buff, 0)==errQUEUE_FULL)
                 Serial.println("over flow\n");
             //file->flush();
