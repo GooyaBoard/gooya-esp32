@@ -25,7 +25,7 @@ public:
     WM8731();
     void initialize(gpio_num_t i2c_sda, gpio_num_t i2c_scl, uint8_t i2c_addr);
     void start();
-    void setup(int32_t fs, bool useMic, bool micBoost);
+    void setup(int32_t fs, bool useMic, bool micBoost,int headphonelevel=-24);
     void stop();
 private:
     I2CMaster i2c;
