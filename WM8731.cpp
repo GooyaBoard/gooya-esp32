@@ -39,7 +39,7 @@ void WM8731::stop()
     i2c.stop();
 }
 
-void WM8731::setup(int32_t fs, bool useMic, bool micBoost)
+void WM8731::setup(int32_t fs, bool useMic, bool micBoost,int headphonelevel)
 { 
     // reset
     resetDevice();
@@ -57,8 +57,8 @@ void WM8731::setup(int32_t fs, bool useMic, bool micBoost)
     }
 
     // Headphone out (0dB)
-    setLeftHeadphoneOut(1, 1, -30);//-24dB
-    setRightHeadphoneOut(1, 1, -30);//-24dB
+    setLeftHeadphoneOut(1, 1, headphonelevel);//-24dB
+    setRightHeadphoneOut(1, 1, headphonelevel);//-24dB
     
     //setAnalogueAudioPathControl(SIDEATT,SIDETONE,DACSEL,BYPASS,INSEL,MUTEMIC,MICBOOST);
     if (useMic) {
@@ -84,10 +84,10 @@ void WM8731::setup(int32_t fs, bool useMic, bool micBoost)
     
     //setSamplingControl(int32_t CLKODIV2, int32_t CLKIDIV2, int32_t SR, int32_t BOSR, int32_t USBNORM)
     if(fs==48000){
-	setSamplingControl(0, 0, 0, 0, 0);//48kHz
+	    setSamplingControl(0, 0, 0, 0, 0);//48kHz
     }
     else if(fs==96000){
-	setSamplingControl(0, 0, 0x7, 0, 0);//96kHz
+	    setSamplingControl(0, 0, 0x7, 0, 0);//96kHz
     }
     
     setActiveControl(1);
@@ -118,7 +118,7 @@ void WM8731::setRightLineIn(int32_t RLINBOTH, int32_t RINMUTE, float _RINVOL)
 void WM8731::setLeftHeadphoneOut(int32_t LRHPBOTH, int32_t LZCEN, int32_t LHPVOL)
 {
     //LHPVOL=-73~+6
-    if(LHPVOL<-73)LHPVOL=0;
+    if(LHPVOL<-73)LHPVOL=-73;
     if(LHPVOL>6)LHPVOL=6;
     LHPVOL+=48+73;//LHPVOL=0110000 to 11111111, 48(0110000) means -73dB, 127 means +6dB
     int32_t val = ((LRHPBOTH & 0x01) << 8) | ((LZCEN & 0x01) << 7) | (LHPVOL & 0x7F);
@@ -128,7 +128,7 @@ void WM8731::setLeftHeadphoneOut(int32_t LRHPBOTH, int32_t LZCEN, int32_t LHPVOL
 void WM8731::setRightHeadphoneOut(int32_t RLHPBOTH, int32_t RZCEN, int32_t RHPVOL)
 {
     //RHPVOL=-73~+6
-    if(RHPVOL<-73)RHPVOL=0;
+    if(RHPVOL<-73)RHPVOL=-73;
     if(RHPVOL>6)RHPVOL=6;
     RHPVOL+=48+73;//RHPVOL=0110000 to 11111111, 48(0110000) means -73dB, 127 means +6dB
     int32_t val = ((RLHPBOTH & 0x01) << 8) | ((RZCEN & 0x01) << 7) | (RHPVOL & 0x7F);

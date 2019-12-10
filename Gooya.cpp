@@ -147,11 +147,11 @@ GooyaPlayer::GooyaPlayer()
     queue=xQueueCreate(GOOYA_PLAY_BUFFER_COUNT,sizeof(int16_t*));
 }
 
-void GooyaPlayer::start(int sample_rate, File& file)
+void GooyaPlayer::start(int sample_rate, File& file, int headphonelevel)
 {
     codec.initialize((gpio_num_t)I2C_SDIN, (gpio_num_t)I2C_SCLK, (gpio_num_t)I2C_ADR);
     codec.start();
-    codec.setup(sample_rate,true,true);
+    codec.setup(sample_rate,true,true,headphonelevel);
     i2s.initialize(sample_rate,GOOYA_CPU,nullptr,GooyaPlayer::_outputcallback,this);
 
     this->file=&file;

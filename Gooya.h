@@ -79,7 +79,7 @@ class GooyaPlayer
 {
 public:
     GooyaPlayer();
-    void start(int sample_rate, File& file);
+    void start(int sample_rate, File& file, int headphonelevel=-24);
     void stop();
 
 private:
