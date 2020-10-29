@@ -249,15 +249,15 @@ GooyaEffect::GooyaEffect()
     outputqueue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
 }
 
-void GooyaEffect::start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK _callback)
+void GooyaEffect::start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK _callback, int headphonelevel)
 {
     codec.initialize((gpio_num_t)I2C_SDIN, (gpio_num_t)I2C_SCLK, (gpio_num_t)I2C_ADR);
     codec.start();
     
     if(devid==GOOYARECORDER_MICIN)
-        codec.setup(sample_rate,true,true);
+        codec.setup(sample_rate,true,true,headphonelevel);
     else if(devid==GOOYARECORDER_LINEIN)
-        codec.setup(sample_rate,false,false);
+        codec.setup(sample_rate,false,false,headphonelevel);
     
     i2s.initialize(sample_rate,GOOYA_CPU,GooyaEffect::_inputcallback,GooyaEffect::_outputcallback,this);
 

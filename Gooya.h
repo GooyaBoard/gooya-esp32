@@ -104,7 +104,7 @@ class GooyaEffect
 {
 public:
     GooyaEffect();
-    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback);
+    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback, int headphonelevel=-24);
     void stop();
 
 private:
