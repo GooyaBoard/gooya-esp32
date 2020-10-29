@@ -43,7 +43,7 @@
 using namespace std;
 
 //callback
-typedef void (* GOOYA_AUDIOCALLBACK)(const int16_t* input, int16_t* output, int8_t chs, int32_t frames); 
+typedef void (* GOOYA_AUDIOCALLBACK)(const float* input, float* output, int8_t chs, int32_t frames); 
 
 #define GOOYARECORDER_MICIN 0
 #define GOOYARECORDER_LINEIN 1
@@ -52,7 +52,7 @@ class GooyaRecorder
 {
 public:
     GooyaRecorder();
-    void start(int devid, int sample_rate, File& file);
+    void start(int devid, int sample_rate, File& file, bool stereo=false, bool float32=false);
     void stop();
 
 private:
@@ -60,6 +60,9 @@ private:
     WM8731 codec;
 
     File* file;
+
+    bool stereo;
+    bool float32;
 
     xQueueHandle queue;
     int32_t pos;
@@ -79,12 +82,15 @@ class GooyaPlayer
 {
 public:
     GooyaPlayer();
-    void start(int sample_rate, File& file, int headphonelevel=-24);
+    void start(int sample_rate, File& file, int headphonelevel=-24, bool stereo=false, bool float32=false);
     void stop();
 
 private:
     I2SMaster i2s;
     WM8731 codec;
+
+    bool stereo;
+    bool float32;
 
     File* file;
 
@@ -104,7 +110,7 @@ class GooyaEffect
 {
 public:
     GooyaEffect();
-    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback);
+    void start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK callback, int headphonelevel=-24);
     void stop();
 
 private:
