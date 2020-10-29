@@ -22,13 +22,17 @@ using namespace std;
 #define I2S_BCLK (25)
 #endif
 #ifndef I2S_ADC_DATA
-#define I2S_ADC_DATA (2)
+#define I2S_ADC_DATA (27)
 #endif
 #ifndef I2S_DAC_DATA
 #define I2S_DAC_DATA (17)
 #endif
 #ifndef I2S_ADC_LRCLK
 #define I2S_ADC_LRCLK (26)
+#endif
+
+#ifdef OLD_GOOYA
+#define I2S_ADC_DATA (2)
 #endif
 
 #ifndef I2S_BITS_PER_SAMPLE
