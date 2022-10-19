@@ -105,7 +105,6 @@ GooyaRecorder::GooyaRecorder()
     file=nullptr;
     pos=0;
     chunk_count=0;
-    signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT);
     queue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
 }
 
@@ -236,7 +235,7 @@ void GooyaPlayer::player_task_function()
 GooyaPlayer::GooyaPlayer()
 {
     file=nullptr;
-    signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_PLAY_BUFFER_COUNT);
+    //signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_PLAY_BUFFER_COUNT);
     queue=xQueueCreate(GOOYA_PLAY_BUFFER_COUNT,sizeof(int16_t*));
 }
 
@@ -351,7 +350,7 @@ GooyaEffect::GooyaEffect()
 {
     pos=0;
     chunk_count=0;
-    signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT);
+    //signal.resize(DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT);
     inputqueue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
     outputqueue=xQueueCreate(GOOYA_RECORD_BUFFER_COUNT,sizeof(int16_t*));
 }

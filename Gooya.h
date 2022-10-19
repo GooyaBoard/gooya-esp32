@@ -33,11 +33,11 @@
 #include "I2SMaster.h"
 
 #ifndef GOOYA_RECORD_BUFFER_COUNT
-#define GOOYA_RECORD_BUFFER_COUNT (16)
+#define GOOYA_RECORD_BUFFER_COUNT (2)
 #endif
 
 #ifndef GOOYA_PLAY_BUFFER_COUNT
-#define GOOYA_PLAY_BUFFER_COUNT (16)
+#define GOOYA_PLAY_BUFFER_COUNT (2)
 #endif
 
 using namespace std;
@@ -67,7 +67,7 @@ private:
     xQueueHandle queue;
     int32_t pos;
     int32_t chunk_count;
-    std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    int16_t signal[DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT];
     
     void inputcallback(int16_t* input, int8_t chs, int32_t frames);
     static void _inputcallback(int16_t* input, int8_t chs, int32_t frames, void* param);
@@ -95,7 +95,7 @@ private:
     File* file;
 
     xQueueHandle queue;
-    std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    int16_t signal[DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_PLAY_BUFFER_COUNT];
     
     void outputcallback(int16_t* output, int8_t chs, int32_t frames);
     static void _outputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
@@ -122,7 +122,8 @@ private:
     int32_t pos;
     int32_t chunk_count;
     
-    std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    //std::vector<int16_t> signal;//byte size of DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT;
+    int16_t signal[DMA_AUDIO_FRAMES*AUDIO_CHANNELS*GOOYA_RECORD_BUFFER_COUNT];
     
     void inputcallback(int16_t* output, int8_t chs, int32_t frames);
     static void _inputcallback(int16_t* output, int8_t chs, int32_t frames, void* param);
