@@ -27,6 +27,7 @@ void I2CMaster::initialize(uint8_t addr, gpio_num_t sda, gpio_num_t scl)
     i2c_config.scl_io_num = scl;
     i2c_config.scl_pullup_en = GPIO_PULLUP_ENABLE;
     i2c_config.master.clk_speed = 100000;
+    i2c_config.clk_flags = 0;
 }
 
 I2CMaster::~I2CMaster()
