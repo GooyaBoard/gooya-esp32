@@ -75,8 +75,8 @@ private:
 
     bool started;
     void* param;
-    std::vector<uint8_t> inputbuffer;
-    std::vector<uint8_t> outputbuffer;
+    uint8_t inputbuffer[DMA_TOTAL_BUFFER_SIZE];
+    uint8_t outputbuffer[DMA_TOTAL_BUFFER_SIZE];
     I2S_AUDIOCALLBACK inputcallback;
     I2S_AUDIOCALLBACK outputcallback;
 

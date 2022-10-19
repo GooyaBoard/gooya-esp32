@@ -79,17 +79,10 @@ void I2SMaster::initialize(int sample_rate, int cpu_number,
     this->inputcallback=inputcallback;
     this->outputcallback=outputcallback;  
 
-    if(this->inputcallback!=nullptr)
-        inputbuffer.resize(DMA_TOTAL_BUFFER_SIZE,0);
-    if(this->outputcallback!=nullptr)
-        outputbuffer.resize(DMA_TOTAL_BUFFER_SIZE,0);
-    
     this->param=param;
 
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0_CLK_OUT1);
     REG_SET_FIELD(PIN_CTRL, CLK_OUT1, 0);
-
-    //enable_out_clock();
 }
 
 void I2SMaster::start()
