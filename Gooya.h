@@ -7,7 +7,7 @@
 #define __GOOYA_H__
 
 #ifndef GOOYA_CPU
-    #define GOOYA_CPU (1)
+    #define GOOYA_CPU (0)
 #endif
 
 #include "freertos/FreeRTOS.h"

@@ -127,7 +127,7 @@ void GooyaRecorder::start(int devid, int sample_rate, File& file, bool _stereo, 
     float32=_float32;
 
     running=true;
-    xTaskCreatePinnedToCore((TaskFunction_t)&_recorder_task_function, "recorder_task", 2048*2, this, 6, &recorder_task, 0);
+    xTaskCreatePinnedToCore((TaskFunction_t)&_recorder_task_function, "recorder_task", 1024*2, this, 6, &recorder_task, GOOYA_CPU);
     
     i2s.start();
 }
@@ -253,7 +253,7 @@ void GooyaPlayer::start(int sample_rate, File& file, int headphonelevel, bool _s
     float32=_float32;
 
     running=true;
-    xTaskCreatePinnedToCore((TaskFunction_t)&_player_task_function, "player_task", 2048*2, this, 5, &player_task, 0);
+    xTaskCreatePinnedToCore((TaskFunction_t)&_player_task_function, "player_task", 1024*2, this, 5, &player_task, GOOYA_CPU);
     vTaskDelay(500);//wait for expecting pre-read queue retension 
     i2s.start();
 }
@@ -370,7 +370,7 @@ void GooyaEffect::start(int devid, int sample_rate, GOOYA_AUDIOCALLBACK _callbac
     pos=0;
     running=true;
     callback=_callback;
-    xTaskCreatePinnedToCore((TaskFunction_t)&_effect_task_function, "effect_task", 2048*2, this, 6, &effect_task, 0);
+    xTaskCreatePinnedToCore((TaskFunction_t)&_effect_task_function, "effect_task", 1024*2, this, 6, &effect_task, GOOYA_CPU);
     
     i2s.start();
 }
